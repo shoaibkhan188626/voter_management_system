@@ -41,11 +41,42 @@ export const getByHouseNo = async (req, res) => {
 
 export const create = async (req, res) => {
   try {
-    const newVoter = new voterSchema(req.body);
+    const {
+      gharNo,
+      voterId,
+      name,
+      fatherName,
+      age,
+      address,
+      gender,
+      serialNumber,
+      yadiSerial,
+      amount,
+      comment,
+      updatedBy,
+      photo,
+    } = req.body;
+    const newVoter = new voterSchema({
+      name,
+      fatherName,
+      age,
+      gender,
+      gharNo,
+      address,
+      photo,
+      voterId,
+      yadiSerial,
+      serialNumber,
+      amount,
+      updatedBy,
+      comment,
+    });
     await newVoter.save();
-    res.status(201).json(newVoter);
+    res
+      .status(200)
+      .json({ message: "Voter Created Successfully", voter: newVoter });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 

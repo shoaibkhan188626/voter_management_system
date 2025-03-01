@@ -14,7 +14,7 @@ const voterSchema = new mongoose.Schema(
     amount: { type: String, required: true },
     comment: { type: String, required: true },
     updatedBy: { type: String, required: true },
-    photo:{type:String, required:true}
+    photo: { type: String, required: true },
   },
   { timestamps: true }
 );
