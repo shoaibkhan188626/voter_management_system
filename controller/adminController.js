@@ -2,32 +2,39 @@ import Admin from "../schema/adminSchema.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
+const SECRET_KEY = "SECRET_KEY";
+
 export const adminSignup = async (req, res) => {
   try {
     const { firstName, lastName, phoneNumber, userName, password } = req.body;
 
-    const existingAdmin = await Admin.findOne({ userName });
+    //checking if admin already exists
+    const [existingAdmin, existingPhone] = await Promise.all([
+      Admin.findOne({ userName }),
+      Admin.findOne({ phoneNumber }),
+    ]);
 
-    if (existingAdmin) {
-      return res.status(400).json({ message: "Admin already exists" });
-    }
+    if (existingAdmin)
+      return res.status(400).json({ message: "Admin Already exists" });
 
-    const existingPhone = await Admin.findOne({ phoneNumber });
-    if (existingPhone) {
+    if (existingPhone)
       return res
         .status(400)
-        .json({ message: "Phone Number is already in use" });
-    }
+        .json({ message: "This phone number Already in use" });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const newAdmin = new Admin({
       firstName,
       lastName,
       phoneNumber,
       userName,
-      password,
+      password: hashedPassword,
     });
+
     await newAdmin.save();
-    res.status(201).json({ message: "Admin account created successfully" });
+
+    res.status(200).json({ message: "new Admin created successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -35,21 +42,33 @@ export const adminSignup = async (req, res) => {
 
 export const adminLogin = async (req, res) => {
   try {
-    const { userName, password } = req.body;
-    const admin = await Admin.findOne({ userName });
-    if (!admin) {
-      return res.status(404).json({ message: "Admin not found" });
+    let { identifier, password } = req.body; // Identifier can be username or phone number
+
+    if (!identifier || !password) {
+      return res.status(400).json({ message: "Both identifier and password are required" });
     }
-    const isMatch = await bcrypt.compare(password, admin.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: "Invalid Credentials" });
-    }
-    const token = jwt.sign({ id: admin._id }, "SECRET_KEY", {
-      expiresIn: "1d",
+
+    identifier = String(identifier).trim(); // Ensure it's a string
+
+    console.log("Login attempt with identifier:", identifier);
+
+    const admin = await Admin.findOne({
+      $or: [{ userName: identifier }, { phoneNumber: identifier }]
     });
 
-    res.json({ message: "Login successful", token });
+    console.log("Admin found:", admin); // Debugging step
+
+    if (!admin) return res.status(404).json({ message: "Admin not found" });
+
+    // Compare passwords
+    const isMatch = await bcrypt.compare(password, admin.password);
+    if (!isMatch) return res.status(400).json({ message: "Invalid Credentials" });
+
+    // Generate JWT Token
+    const token = jwt.sign({ id: admin._id }, SECRET_KEY, { expiresIn: "1d" });
+
+    res.status(200).json({ message: "Login successful", token });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message || "Internal Server Error" });
   }
 };
