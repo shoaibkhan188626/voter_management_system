@@ -1,6 +1,4 @@
 import voterSchema from "../schema/voterSchema.js";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 
 //for getting all the voters in the database
 export const getAll = async (req, res) => {

@@ -31,7 +31,7 @@ export const adminSignup = async (req, res) => {
       userName,
       password: hashedPassword,
     });
-
+    console.log(newAdmin);
     await newAdmin.save();
 
     res.status(200).json({ message: "new Admin created successfully" });
@@ -42,33 +42,31 @@ export const adminSignup = async (req, res) => {
 
 export const adminLogin = async (req, res) => {
   try {
-    let { identifier, password } = req.body; // Identifier can be username or phone number
+    let { identifier, password } = req.body; // Username or phone number
 
     if (!identifier || !password) {
-      return res.status(400).json({ message: "Both identifier and password are required" });
+      return res
+        .status(400)
+        .json({ message: "Both identifier and password are required" });
     }
-
     identifier = String(identifier).trim(); // Ensure it's a string
 
-    console.log("Login attempt with identifier:", identifier);
-
+    // Find admin by username or phone number
     const admin = await Admin.findOne({
-      $or: [{ userName: identifier }, { phoneNumber: identifier }]
+      $or: [{ userName: identifier }, { phoneNumber: identifier }],
     });
 
-    console.log("Admin found:", admin); // Debugging step
-
     if (!admin) return res.status(404).json({ message: "Admin not found" });
-
-    // Compare passwords
     const isMatch = await bcrypt.compare(password, admin.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid Credentials" });
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid Credentials" });
+    }
 
     // Generate JWT Token
     const token = jwt.sign({ id: admin._id }, SECRET_KEY, { expiresIn: "1d" });
-
     res.status(200).json({ message: "Login successful", token });
   } catch (error) {
+    console.error("Login error:", error);
     res.status(500).json({ error: error.message || "Internal Server Error" });
   }
 };

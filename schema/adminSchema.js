@@ -10,7 +10,11 @@ const adminschema = new mongoose.Schema({
 });
 
 adminschema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+  if (!this.isModified("password")) return next(); // Skip if not changed
+
+  // Ensure the password is not already hashed
+  if (this.password.startsWith("$2b$")) return next();
+
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   next();
