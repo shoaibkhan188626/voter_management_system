@@ -51,19 +51,19 @@ export const getByHouseNo = async (req, res) => {
 export const create = async (req, res) => {
   try {
     const requiredFields = [
-      "gharNo",
-      "voterId",
       "name",
       "fatherName",
       "age",
-      "address",
       "gender",
+      "photo",
+      "voterId",
+      "gharNo",
+      "address",
       "serialNumber",
       "yadiSerial",
       "amount",
       "comment",
       "updatedBy",
-      "photo",
     ];
 
     // Check if any required field is missing
