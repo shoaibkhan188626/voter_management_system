@@ -2,11 +2,14 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
+import bodyParser from 'body-parser'
 import voterRoutes from "./routes/voterRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 dotenv.config();
 
 const app = express();
+app.use(bodyParser.json({ limit: "10mb" })); // Adjust size if needed
+app.use(bodyParser.urlencoded({ extended: true, limit: "10mb" }));
 app.use(express.json());
 app.use(
   cors({
@@ -18,7 +21,7 @@ app.use(
 );
 const URI = "mongodb://localhost:27017/";
 const PORT = 5000;
-const mongoURI = "mongodb://0.0.0.0:27017/votersDB";
+const mongoURI = "mongodb+srv://shoaibullakhan15:s2CB11qKkNzldYY4@votermanagementsystem.fluwo.mongodb.net/";
 
 mongoose
   .connect(mongoURI, {

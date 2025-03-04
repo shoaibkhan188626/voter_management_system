@@ -66,25 +66,31 @@ export const create = async (req, res) => {
       "photo",
     ];
 
-    for (const field of requiredFields) {
-      if (!req.body[field])
-        return res
-          .status(400)
-          .json({ success: false, message: `${field} is required` });
+    // Check if any required field is missing
+    const missingFields = requiredFields.filter((field) => !req.body[field]);
 
-      const newVoter = new voterSchema(req.body);
-      await newVoter.save();
-
-      res.status(201).json({
-        success: true,
-        message: "voter created successfully",
-        voter: newVoter,
+    if (missingFields.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Missing fields: ${missingFields.join(", ")}`,
       });
     }
+
+    // Proceed with voter creation
+    const newVoter = new voterSchema(req.body);
+    await newVoter.save();
+
+    return res.status(201).json({
+      success: true,
+      message: "Voter created successfully",
+      voter: newVoter,
+    });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    console.error("Error creating voter:", error);
+    return res.status(500).json({ success: false, error: error.message });
   }
 };
+
 
 export const update = async (req, res) => {
   try {
