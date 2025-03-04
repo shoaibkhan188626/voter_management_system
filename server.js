@@ -5,7 +5,7 @@ import cors from "cors";
 import bodyParser from 'body-parser'
 import voterRoutes from "./routes/voterRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
-dotenv.config();
+dotenv.config({path:'./config.env'});
 
 const app = express();
 app.use(bodyParser.json({ limit: "10mb" })); // Adjust size if needed
@@ -19,9 +19,9 @@ app.use(
     credentials: true,
   })
 );
-const URI = "mongodb://localhost:27017/";
-const PORT = 5000;
-const mongoURI = "mongodb+srv://shoaibullakhan15:s2CB11qKkNzldYY4@votermanagementsystem.fluwo.mongodb.net/";
+
+const PORT = process.env.PORT;
+const mongoURI = process.env.MONGO_URI//"mongodb+srv://shoaibullakhan15:s2CB11qKkNzldYY4@votermanagementsystem.fluwo.mongodb.net/";
 
 mongoose
   .connect(mongoURI, {
